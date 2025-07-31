@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog Editor | ModernBlog</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/style_blog_editor.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Lato:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="ai-loading-overlay" style="display: none">
+      <div class="spinner"></div>
+      <p>AI is working...</p>
+    </div>
+    <div id="notification-container"></div>
+    <header>
+      <div class="container">
+        <a href="index.html" class="logo">Blog Editor</a>
+        <button id="aiSettingsBtn" title="AI Settings">⚙️ AI</button>
+      </div>
+    </header>
+    <div id="ai-settings-modal" style="display: none">
+      <div class="modal-content">
+        <span class="close-modal-btn">×</span>
+        <h2>AI Settings</h2>
+        <p class="modal-info">
+          Keys are saved securely in your browser's `localStorage` and never
+          leave your machine.
+        </p>
+        <div class="api-key-group">
+          <h3>Text & Image Generation</h3>
+          <label for="openai-api-key">OpenAI API Key (GPT, DALL-E)</label
+          ><input type="password" id="openai-api-key" placeholder="sk-..." />
+        </div>
+        <div class="api-key-group">
+          <h3>Text Generation (Google)</h3>
+          <label for="gemini-api-key">Google AI (Gemini) API Key</label
+          ><input type="password" id="gemini-api-key" placeholder="AIzaSy..." />
+        </div>
+        <div class="api-key-group">
+          <h3>Text Generation (Fast)</h3>
+          <label for="groq-api-key">Groq API Key (Llama, etc.)</label
+          ><input type="password" id="groq-api-key" placeholder="gsk_..." />
+        </div>
+        <div class="api-key-group">
+          <h3>Image Generation (Alternative)</h3>
+          <label for="hf-api-key">Hugging Face API Key (Flux, SD)</label
+          ><input type="password" id="hf-api-key" placeholder="hf_..." />
+        </div>
+        <div class="model-selection-group">
+          <h3>Default Models</h3>
+          <label for="default-text-model">Text Model:</label>
+          <div class="custom-select" id="default-text-model">
+            <div class="custom-select-trigger">
+              <span class="custom-select-value"
+                >No valid API key provided, text Models are not available</span
+              ><span class="custom-select-arrow">▼</span>
+            </div>
+            <div class="custom-select-options"></div>
+          </div>
+          <label for="default-image-model">Image Model:</label>
+          <div class="custom-select" id="default-image-model">
+            <div class="custom-select-trigger">
+              <span class="custom-select-value"
+                >No valid API key provided, image Models are not available</span
+              ><span class="custom-select-arrow">▼</span>
+            </div>
+            <div class="custom-select-options"></div>
+          </div>
+        </div>
+        <button id="save-ai-settings-btn">Save & Test Settings</button>
+      </div>
+    </div>
+    <main class="editor-main" id="editor-main-container">
+      <div class="editor-controls">
+        <h2>Control Panel</h2>
+        <div class="control-group">
+          <h3>File Actions</h3>
+          <button id="newPostBtn">New Post</button
+          ><button id="saveDraftBtn">Save Draft</button
+          ><label class="file-input-label" for="loadPostInput"
+            >Load Post (.html)</label
+          ><input
+            type="file"
+            id="loadPostInput"
+            accept=".html"
+            style="display: none"
+          />
+        </div>
+        <div class="control-group">
+          <h3>Meta Data</h3>
+          <label for="postTitle">Title:</label
+          ><input
+            type="text"
+            id="postTitle"
+            placeholder="The post's title..."
+          /><label for="postAuthor">Author:</label
+          ><input type="text" id="postAuthor" placeholder="Author's name..." />
+          <label for="cardImageInput">Card Image URL:</label>
+          <input
+            type="text"
+            id="cardImageInput"
+            placeholder="images/image.jpg or https://..."
+          />
+          <button id="loadCardImageBtn" class="secondary-action">
+            Load Image from Computer
+          </button>
+          <img
+            id="cardImagePreview"
+            src=""
+            alt="Card image preview"
+            style="display: none"
+          />
+          <label for="postCategory">Category:</label>
+          <div class="custom-select" id="postCategory">
+            <div class="custom-select-trigger">
+              <span class="custom-select-value">Select...</span
+              ><span class="custom-select-arrow">▼</span>
+            </div>
+            <div class="custom-select-options"></div>
+          </div>
+          <label for="newCategoryInput" class="sub-label"
+            >Or add a new one:</label
+          ><input
+            type="text"
+            id="newCategoryInput"
+            placeholder="New category name..."
+          /><button id="addCategoryBtn">Add New Category</button>
+        </div>
+        <div class="control-group">
+          <h3>Add Content</h3>
+          <p class="add-content-info">
+            New elements are inserted below the selected section, or at the end
+            if nothing is selected.
+          </p>
+          <button id="addParagraphBtn">Paragraph</button
+          ><button id="addBoldParagraphBtn">Bold Paragraph</button
+          ><button id="addH2Btn">H2 Heading</button
+          ><button id="addImageBtn">Inner Image</button
+          ><button id="addBulletListBtn">Bulleted List</button
+          ><button id="addSpacerBtn">Insert Spacer</button
+          ><button id="addLinkBtn" class="secondary-action">Insert Link</button>
+        </div>
+        <div class="control-group">
+          <h3>AI Assistant</h3>
+          <div id="ai-assistant-wrapper" class="ai-disabled">
+            <p id="ai-status-message" class="ai-status-message">
+              To use AI features, please add the required API keys in the
+              <a href="#" id="open-ai-settings-link">AI Settings</a> panel.
+            </p>
+            <div id="ai-assistant-content">
+              <div class="ai-assistant-tabs">
+                <button class="ai-tab-btn active" data-tab="text-ai">
+                  Text</button
+                ><button class="ai-tab-btn" data-tab="image-ai">Image</button>
+              </div>
+              <div id="text-ai" class="ai-tab-content active">
+                <textarea
+                  id="ai-text-prompt"
+                  placeholder="Instruction for the AI..."
+                  rows="4"
+                ></textarea>
+                <div class="ai-button-group">
+                  <button id="ai-generate-text-btn">Generate</button
+                  ><button id="ai-copy-paste-btn" class="secondary-action">
+                    Copy
+                  </button>
+                </div>
+                <div class="ai-quick-actions">
+                  <button id="ai-continue-post-btn">Continue Post</button
+                  ><button id="ai-suggest-titles-btn">Suggest Titles</button>
+                </div>
+              </div>
+              <div id="image-ai" class="ai-tab-content">
+                <textarea
+                  id="ai-image-prompt"
+                  placeholder="Description of the image..."
+                  rows="4"
+                ></textarea
+                ><button id="ai-generate-image-btn">Generate Image</button>
+                <div id="ai-image-preview-container" style="display: none">
+                  <img
+                    id="ai-generated-image"
+                    src=""
+                    alt="AI-generated image"
+                  />
+                  <div class="ai-image-actions">
+                    <button id="ai-set-card-image-btn">Set as Card Image</button
+                    ><button id="ai-insert-image-btn">Insert into Post</button
+                    ><button
+                      id="ai-download-image-btn"
+                      class="secondary-action"
+                    >
+                      Download
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group generate-group">
+          <h3>Generate & Publish</h3>
+          <label for="postFilename">Filename (.html excluded):</label
+          ><input
+            type="text"
+            id="postFilename"
+            placeholder="e.g., the-future-of-ai"
+          />
+          <p class="file-load-info">To proceed, load the pages to modify:</p>
+          <label class="file-input-label" for="loadIndexInput"
+            >1. Load Home Page (index.html)</label
+          ><input
+            type="file"
+            id="loadIndexInput"
+            accept=".html"
+            style="display: none"
+          /><span id="indexStatus" class="file-status">Not loaded</span
+          ><label class="file-input-label" for="loadBlogInput"
+            >2. Load Blog Page (blog.html)</label
+          ><input
+            type="file"
+            id="loadBlogInput"
+            accept=".html"
+            style="display: none"
+          /><span id="blogStatus" class="file-status">Not loaded</span
+          ><button id="generateBtn">Publish: Generate Files</button>
+        </div>
+      </div>
+      <div id="editor-preview-container" class="editor-preview-container">
+        <h2>Live Preview</h2>
+        <div id="live-preview" class="blog-post-container"></div>
+      </div>
+    </main>
+    <input
+      type="file"
+      id="cardImageFileInput"
+      accept="image/*"
+      style="display: none"
+    />
+    <input
+      type="file"
+      id="innerImageFileInput"
+      accept="image/*"
+      style="display: none"
+    />
+    <script src="js/editor.js"></script>
+  </body>
+</html>
