@@ -1477,7 +1477,9 @@ document.addEventListener("DOMContentLoaded", () => {
           const metaText = doc.querySelector(".post-meta").textContent;
           newPost.author = metaText.match(/By: (.*?)\s*\|/)[1].trim();
           newPost.category = doc.querySelector(".post-meta a").textContent;
-          newPost.cardImage = "";
+          // Safely find the meta tag and get its content, or default to empty string
+          const cardImageMetaTag = doc.querySelector('meta[name="card-image"]');
+          newPost.cardImage = cardImageMetaTag ? cardImageMetaTag.getAttribute('content') : '';
           Array.from(doc.querySelector(".post-body").children).forEach((el) => {
             const textContent = el.innerHTML.replace(/<br\s*\/?>/gi, "\n");
             if (el.tagName === "P") {
@@ -1703,9 +1705,13 @@ function generatePostHTML(post) {
     month: "long",
     day: "numeric",
   });
+  // Create a meta tag for the card image IF it exists.
+  const cardImageMeta = post.cardImage 
+    ? `<meta name="card-image" content="${post.cardImage}">` 
+    : '';
   return `<!DOCTYPE html>\n<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${
     post.title
-  } | ModernBlog</title><link rel="stylesheet" href="../css/style.css"><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet"></head><body><header><div class="container"><a href="../index.html" class="logo">ModernBlog</a><nav><button class="menu-toggle" aria-label="Toggle Navigation">☰</button><ul><li><a href="../index.html">Home</a></li><li><a href="../about.html">About Us</a></li><li><a href="../services.html">Services</a></li><li><a href="../blog.html" class="active">Blog</a></li><li><a href="../contact.html">Contact</a></li></ul></nav></div></header><main><div class="blog-post-container"><article class="blog-post"><h1>${
+  } | ModernBlog</title>${cardImageMeta}<link rel="stylesheet" href="../css/style.css"><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet"></head><body><header><div class="container"><a href="../index.html" class="logo">ModernBlog</a><nav><button class="menu-toggle" aria-label="Toggle Navigation">☰</button><ul><li><a href="../index.html">Home</a></li><li><a href="../about.html">About Us</a></li><li><a href="../services.html">Services</a></li><li><a href="../blog.html" class="active">Blog</a></li><li><a href="../contact.html">Contact</a></li></ul></nav></div></header><main><div class="blog-post-container"><article class="blog-post"><h1>${
     post.title
   }</h1><div class="post-meta"><span>By: ${
     post.author
